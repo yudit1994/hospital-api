@@ -1,0 +1,167 @@
+<style>
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        background-color: #D3D3D3;
+    }
+    #patient1 {
+        border: 3px solid #f1f1f1;
+        margin: -20px 700px 0px 100px
+    }
+    #patient2 {
+        border: 3px solid #f1f1f1;
+        margin: 17px 47px 5px 47px;
+        overflow-y: scroll;
+		max-height: 30vh;
+		max-width: 40vw;
+        padding: 5px 10px 5px 20px;
+    }
+    .container {
+      padding: 56px;
+      background-color: white
+    }
+    #report{
+        border: 3px solid #f1f1f1;
+        margin: -407px 17px 5px 697px;
+        position: absolute;
+        top: 650px;
+        background-color: white
+    }
+    input ,select {
+      width: 100%;
+      padding: 10px 14px;
+      margin: 8px 0;
+      display: inline-block;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      font-size: 21px;
+    }
+    
+    #sub {
+      background-color: #04AA6D;
+      color: white;
+      padding: 14px 20px;
+      margin: 8px 0;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+    }
+    #link1{
+      position: absolute;
+      top: 42px;
+    left: 1036px;
+    }
+    #link2{
+        position: absolute;
+        top: 41px;
+        left: 1276px;
+    }
+    #repp{
+        padding: 5px 5px 5px 20px;
+    }
+    
+    h1{
+        font-size: 70px;
+        margin: 5px 0px 0px 400px;
+    }
+    #cl{
+        position: relative;
+        top: -22px;
+    }
+</style>
+<h1>Patients Page</h1>
+<a href="/patients/status-page" id="link1">Show the status of all patients</a><br>
+<a href="/" id="link2">logout</a>
+
+<!--form for checking the patient in database-->
+<form method="post" action="/patients/check" id="fm">
+    <input type="number" name="phone" placeholder="enter the phone no. of patient">
+    <input type="submit" id="sub" value="Search patient">
+</form>
+<br>
+
+<!--a is 1 when we want to display patients data and create report form-->
+<% if(a==1){ %>
+    <div id="patient1">
+        <div class="container">
+   <b>Patient Name:</b> <%= patient.name %><br>
+   <b>Patient Age: </b> <%= patient.age %><br>
+   <b>Patient Place: </b> <%= patient.place %><br>
+    <div id="patient2" >
+    <h2>All Reports Of the <%= patient.name %></h2>
+    <% var m=1 %>
+    <% for(var j = patient.report.length-1; j>=0; j--){ %>
+    <%= m %> :
+    <% m++ %>
+   <b>Doctor Name: </b> <%= patient.report[j].doctor %><br>
+   <b> Status: </b><%= patient.report[j].status %> <br>
+    <% 
+    var today = patient.report[j].date;
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+    var yyyy = today.getFullYear();
+
+    today = dd + '/' + mm + '/' + yyyy;
+    %>
+   <b>Date of report </b><%= today %><br><br>
+    <% } %>
+    </div>
+    </div>
+    </div>
+    
+    <div id="report">
+        <div id="repp">
+    <h3>Create A New Report</h3>
+    <!--create report form-->
+    <form method="post" action="/patients/<%= patient._id %>/create_report">
+        Created By Doctor:<input type="text" name="doctor">
+        Status:<select name="status" id="status" class="form-control">
+                <option value="Negative">Negative</option>
+                <option value="Travelled-Quarantine">Travelled-Quarantine</option>
+                <option value="Symptoms-Quarantine">Symptoms-Quarantine</option>
+                <option value="Positive-Admit">Positive-Admit</option>
+               </select><br>
+        Date:   <input type="date" name="date"><br>
+        <input type="submit" value="create report" id="sub">
+    </form>
+    </div>
+    </div>
+<% } %>
+
+<!--a is 2 when we want to display the form for adding data of patient-->
+<% if(a==2){ %>
+    <% if(b==1){ %>
+    <script>
+        alert('Patient with phone no. not found , create new patient record');
+    </script>
+    <% } %>
+    <% if(b==2){ %>
+    <script>
+        alert('Enter patient data correctly');
+    </script>
+    <% } %>
+    <a href="/doctors/login" id="cl">CLOSE</a>
+
+    <!--login form for patient registering-->
+    <form method="post" action="/patients/register">
+    <b>Name:</b>  <input type="text" name="name" placeholder="Name of the patient to created">
+    <b>Age: </b> <input type="number" name="age" placeholder="Age of the patient to created">
+    <b>Place: </b> <input type="text" name="place" placeholder="Place of the patient to created">
+    <b>Phone: </b> <input type="number" name="phone" placeholder="Phone no. of the patient to created">
+      <input type="submit" value="Create Patient" id="sub">
+    </form>
+<% } %>
+
+<!--a is 3 when report of patient is created-->
+<% if(a == 3){ %>
+<script>
+    alert('report created successfully');
+</script>
+<% } %>
+
+<!--a is 4 when data is not entered-->
+<% if(a==4){ %>
+    <script>
+        alert('enter data correctly');
+    </script>
+<% } %>
+

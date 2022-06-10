@@ -1,0 +1,109 @@
+<style>
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        background-color: #D3D3D3;
+    }
+    form {
+        border: 3px solid #f1f1f1;
+        margin: 76px 400px 0px 400px
+    }
+    
+    input[type=text], input[type=password] {
+      width: 100%;
+      padding: 10px 14px;
+      margin: 8px 0;
+      display: inline-block;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      font-size: 21px;
+    }
+    
+    #sub {
+      background-color: #04AA6D;
+      color: white;
+      padding: 14px 20px;
+      margin: 8px 0;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+    }
+    
+    button:hover {
+      opacity: 0.8;
+    }
+    
+    .cancelbtn {
+      width: auto;
+      padding: 10px 18px;
+      background-color: #f44336;
+    }
+    
+    .imgcontainer {
+      text-align: center;
+      margin: 24px 0 12px 0;
+    }
+    
+    img.avatar {
+      width: 40%;
+      border-radius: 50%;
+    }
+    
+    .container {
+      padding: 56px;
+      background-color: white
+    }
+    
+    span.psw {
+      float: right;
+      padding-top: 16px;
+    }
+    
+    h1{
+        margin-left:77px
+    }
+    /* Change styles for span and cancel button on extra small screens */
+    @media screen and (max-width: 300px) {
+      span.psw {
+         display: block;
+         float: none;
+      }
+      .cancelbtn {
+         width: 100%;
+      }
+    }
+</style>
+<!--not is 1 when token expires-->
+<% if(not == 1){ %>
+<script>
+    alert('token expired , login again');
+</script>
+<% } %>
+<!--not is 2 when invalid username , password is entered-->
+<% if(not == 2){ %>
+   <script>
+     alert('Invalid username or password');
+   </script>
+    <% } %>
+    
+<!--not is 3 when doctor is registered successfuly-->
+<% if(not == 3){ %>
+   <script>
+     alert('Successfully registered, login now');
+   </script>
+<% } %>
+
+<!--login form for doctor-->
+<form method="post" action="/doctors/login">
+<div class="container">
+<h1>Login As a Doctor</h1><br><br>
+
+<b>Username: </b><input type="text" name="username">
+<b>Password: </b><input type="password" name="password">
+<input type="submit" value="Login" id="sub"><br><br>
+
+
+<p>Havent registered yet?</p>
+<a href="/register-page">Register as doctor</a>
+</div>
+</form>
+
