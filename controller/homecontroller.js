@@ -5,43 +5,23 @@ const jwt = require('jsonwebtoken');
 
 var token = '';
 
-//returns the homepage
-module.exports.home = function(req,res){
-    res.render('home',{
-        not:0
-    });
-}
-
-//return the register doctor page
-module.exports.registerpage = function(req,res){
-    res.render('registerdoctor',{
-        not:0
-    });
-}
-
 //registers the doctor
 module.exports.registerdoctor = function(req,res){
-
+    
     doctors.create({
-        name:req.body.username,
+        name:req.body.name,
         email:req.body.email,
         password:req.body.password
     },function(err,doctor){
         if(err){
-            console.log('error in registering doctor',err);
-            return res.render('registerdoctor',{
-                not:1
-            });
+            console.log('**',err);
+            return res.status(500).send('not createdddd');
         }
         if(doctor){
-           return res.render('home',{
-             not:3
-           });
+            return res.status(200).send('created successfully');
         }
         else{
-            return res.render('registerdoctor',{
-                not:1
-            });
+            return res.status(500).send('not created');
         }
     })
 }
@@ -49,179 +29,78 @@ module.exports.registerdoctor = function(req,res){
 //doctor login
 module.exports.doctorslogin = async function(req,res){
    
-    let Doctor = await doctors.findOne({name:req.body.username});
+    let Doctor = await doctors.findOne({name:req.body.name});
     
     if(!Doctor || Doctor.password != req.body.password){
-        return res.render('home',{
-            not:2
-        });
+        return res.status(500).send('not logged in');
     }
 
     //creates the jwt token with secretskey 'hopsital' and expires in 1000sec
-    token = jwt.sign(Doctor.toJSON(),'hospital',{expiresIn:'1000000'});
+    token = jwt.sign(Doctor.toJSON(),'hospital',{expiresIn:'100000000'});
 
-    return res.render('patients',{
-               a:0
-               });
+    return res.status(200).send({
+        message:'logged in successfully',
+        TOKEN: token
+    });
     
     
 }
 
-//doctor login refresh
-module.exports.doctorslogin2 = function(req,res){
-    jwt.verify(token, 'hospital', function(err, decoded) {
-        if (err) {
-          
-         if(err.name=='TokenExpiredError'){
-            
-            return res.render('home',{
-                not:1
-            });
-         }
-        }
-        if(decoded){
-        return res.render('patients',{
-            a:0
-            });
-        }
-        else{
-            return res.render('home',{
-                not:1
-            });
-        }
-      });
-}
-
-//check if patient is registered
-module.exports.checkpatient = function(req,res){
-    
-    jwt.verify(token, 'hospital', function(err, decoded) {
-        if (err) {
-          
-         if(err.name=='TokenExpiredError'){
-            return res.render('home',{
-                not:1
-            });
-         }
-        }
-        if(decoded){
-           
-        }
-        else{
-            return res.render('home',{
-                not:1
-            }); 
-        }
-      });
-    
-    
-    patient.findOne({phone:req.body.phone}).populate('report')
-    .exec(function(err,patients){
-        if(err){
-            console.log('error in finding patient',err);
-            return;
-        }
-        if(patients){
-         
-          //sorting array records based on dates of reports
-          for(var k=0; k< patients.report.length; k++){
-            for(var l=k+1; l< patients.report.length; l++){
-                 if(patients.report[k].date > patients.report[l].date){
-                     var temp = patients.report[k];
-                     patients.report[k] = patients.report[l];
-                     patients.report[l] = temp;
-                 }
-            }
-          }
-          res.render('patients',{
-              patient:patients,
-              a:1
-          })
-        }
-        else{
-          res.render('patients',{
-              a:2,
-              b:1
-          })
-        }
-    })
-    
-    
-}
-
-//on refresh check patient
-module.exports.checkpatient2 = function(req,res){
-
-    jwt.verify(token, 'hospital', function(err, decoded) {
-        if (err) {
-          
-         if(err.name=='TokenExpiredError'){
-            return res.render('home',{
-                not:1
-            });
-         }
-        }
-        if(decoded){
-            return res.render('patients',{
-                a:0
-              });
-        }
-        else{
-            return res.render('home',{
-                not:1
-            });
-        }
-      });
-      
-}
 
 //patients register
 module.exports.patientregister = function(req,res){
+    try{
     jwt.verify(token, 'hospital', function(err, decoded) {
         if (err) {
           
          if(err.name=='TokenExpiredError'){            
-            return res.render('home',{
-                not:1
-            });
+            return res.status(500).send('Token expired , login again');
          }
         }
         if(decoded){
-            patient.create({
-                name:req.body.name,
-                age:req.body.age,
-                place:req.body.place,
-                phone:req.body.phone
-            },function(err1,patients){
-                if(err1){
-                    console.log('error in registering patient',err1);
-                    return res.render('patients',{
-                        patient:patients,
-                        a:2,
-                        b:2
-                    }) 
-                }
-                if(patients){
-                res.render('patients',{
-                    patient:patients,
-                    a:1
-                })
-                }
-                else{
-                    res.render('patients',{
-                        patient:patients,
-                        a:2,
-                        b:2
-                    }) 
-                }
-            });
-        }
+           console.log('request',req.body);
+           patient.find({phone:req.body.phone},function(err,patient){
+             if(err){
+                return res.status(500).send('error in creating patient'); 
+             }
+             if(patient){
+                console.log('found');
+                return res.status(200).send(patient); 
+             }
+             else{
+                patient.create({
+                    name:req.body.name,
+                    age:req.body.age,
+                    place:req.body.place,
+                    phone:req.body.phone
+                },function(err1,patients){
+                    if(err1){
+                        console.log('**',err1);
+                        return res.status(500).send('error in creating patient'); 
+                    }
+                    if(patients){
+                        return res.status(200).send({
+                            message:'patient created',
+                            patient:patients.name
+                        });
+                    }//if
+                    else{
+                        return res.status(500).send('not created patient');
+                    }//else
+                });
+             }
+             
+           })
+            
+        }//decoded
         else{
-           return res.render('home',{
-                not:1
-            });
+            return res.status(500).send('Token expired , login again');
         }
-      });
+     });//jwt
+    }
+    catch(err){
+        console.log('error',err);
+    }
     
 }
 
@@ -231,10 +110,8 @@ module.exports.createreport = function(req,res){
         if (err) {
           
          if(err.name=='TokenExpiredError'){
+            return res.status(500).send('Token expired , login again');
             
-            return res.render('home',{
-                not:1
-            });
          }
          
         }
@@ -246,107 +123,79 @@ module.exports.createreport = function(req,res){
                 patient:req.params.id
             },function(err,report){
                 if(err){
-                    
-                    return res.render('patients',{
-                        a:4
-                    }); 
+                    console.log('***',err);
+                    return res.status(500).send('error in created report'); 
                      
                 }
                 if(report){
                 patient.findOne({_id:req.params.id},function(err,patient1){
                     if(err){
-                        console.log('error in finding patient to add report',err);
-                        return;
+                        console.log('**',err);
+                        return res.status(500).send('error in creating patient report');
                     }
                     patient1.report.push(report);
                     patient1.save();
                 })
-                return res.render('patients',{
-                    a:3
-                  });
+                return res.status(500).send('created patient report');
                 }
                else{
-                return res.render('patients',{
-                    a:4
-                  });
+                return res.status(500).send('report not created');
                }
             })
         }
         else{
-            return res.render('home',{
-                not:1
-            }); 
+            return res.status(500).send('Token expired , login again');
         }
       });
     
 }
 
-//shows status page
-module.exports.statuspage = function(req,res){
-    jwt.verify(token, 'hospital', function(err, decoded) {
-        if (err) {
-          
-         if(err.name=='TokenExpiredError'){
-            
-            return res.render('home',{
-                not:1
-            });
-         }
-        }
-        if(decoded){
-            res.render('status',{
-                a:0
-            });
-        }
-        else{
-            return res.render('home',{
-                not:1
-            });
-        }
-      });
-    
-}
 
 //displays the slected status
-module.exports.status = function(req,res){
+module.exports.reports = function(req,res){
     jwt.verify(token, 'hospital', function(err, decoded) {
         if (err) {
           
          if(err.name=='TokenExpiredError'){
-            
-            return res.render('home',{
-                not:1
-            });
+            return res.status(500).send('Token expired , login again');
          }
         }
         if(decoded){
-            report.find({status:req.body.status}).populate('patient')
-            .exec(function(err,statuss){
+            
+            patient.find({_id:req.params.id}).populate('report')
+            .exec(function(err,patient){
                 if(err){
-                    console.log('error in finding',err);
-                    return;
+                    console.log('error in creating',err);
+                    res.status(500).send('error in find reports');
                 }
-                for(var k=0; k< statuss.length; k++){
-                    for(var l=k+1; l< statuss.length; l++){
-                         if(statuss[k].date > statuss[l].date){
-                             var temp = statuss[k];
-                             statuss[k] = statuss[l];
-                             statuss[l] = temp;
-                         }
-                    }
-                  }
-                res.render('status',{
-                    status:statuss,
-                    a:1
-                })
+                if(patient){
+                    
+                    res.status(200).send(patient[0].report);
+                }
+                else{
+                    res.status(500).send('no user exists');
+                }
             })
         }
         else{
-            return res.render('home',{
-                not:1
-            });
+            return res.status(500).send('Token expired , login again'); 
         }
       });
     
     
+}
+
+module.exports.status = function(req,res){
+    report.find({status:req.params.status},function(err,report){
+        if(err){
+            console.log('error in finding report',err);
+            res.status(500).send('error in finding reports');
+        }
+        if(report){
+            return res.status(200).send(report);
+        }
+        else{
+            return res.status(500).send('no reports exists');
+        }
+    })
 }
