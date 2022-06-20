@@ -105,6 +105,7 @@ module.exports.patientregister = function(req,res){
 }
 
 //create report of patient
+//**********date format YYYY-MM-DD*******//
 module.exports.createreport = function(req,res){
     jwt.verify(token, 'hospital', function(err, decoded) {
         if (err) {
@@ -116,6 +117,7 @@ module.exports.createreport = function(req,res){
          
         }
         if(decoded){
+        
             report.create({
                 doctor:req.body.doctor,
                 status:req.body.status,
@@ -153,14 +155,14 @@ module.exports.createreport = function(req,res){
 
 //displays the slected status
 module.exports.reports = function(req,res){
-    jwt.verify(token, 'hospital', function(err, decoded) {
-        if (err) {
+    // jwt.verify(token, 'hospital', function(err, decoded) {
+    //     if (err) {
           
-         if(err.name=='TokenExpiredError'){
-            return res.status(500).send('Token expired , login again');
-         }
-        }
-        if(decoded){
+    //      if(err.name=='TokenExpiredError'){
+    //         return res.status(500).send('Token expired , login again');
+    //      }
+    //     }
+    //     if(decoded){
             
             patient.find({_id:req.params.id}).populate('report')
             .exec(function(err,patient){
@@ -170,17 +172,27 @@ module.exports.reports = function(req,res){
                 }
                 if(patient){
                     
+                    for(var k=0; k< patient[0].report.length; k++){
+                        for(var l=k+1; l< patient[0].report.length; l++){
+                             if(patient[0].report[k].date > patient[0].report[l].date){
+                                 var temp = patient[0].report[k];
+                                 patient[0].report[k] = patient[0].report[l];
+                                 patient[0].report[l] = temp;
+                             }
+                        }
+                      }
+                      console.log(patient[0].report);
                     res.status(200).send(patient[0].report);
                 }
                 else{
                     res.status(500).send('no user exists');
                 }
             })
-        }
-        else{
-            return res.status(500).send('Token expired , login again'); 
-        }
-      });
+    //     }
+    //     else{
+    //         return res.status(500).send('Token expired , login again'); 
+    //     }
+    //   });
     
     
 }

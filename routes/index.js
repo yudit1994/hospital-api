@@ -15,7 +15,8 @@ router.post('/doctors/login', homecontroller.doctorslogin);
 router.post('/patients/register',homecontroller.patientregister);
 
 
-//create report of the patient
+//create report of the patient----
+//**********date format YYYY-MM-DD*******//
 router.post('/patients/:id/create_report',homecontroller.createreport);
 
 

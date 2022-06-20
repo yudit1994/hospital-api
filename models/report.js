@@ -12,7 +12,7 @@ const reportschema = mongoose.Schema({
         required:true
     },
     date:{
-        type:String,
+        type:Date,
         required:true
     },
     patient:{

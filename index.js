@@ -11,8 +11,6 @@ app.use('/',require('./routes/index'));
 //import mongoose configuration
 const mongoose = require('./config/mongoose');
 
-//set ejs as template
-app.set('view engine','ejs');
 
 app.listen(port,function(err){
     if(err){
