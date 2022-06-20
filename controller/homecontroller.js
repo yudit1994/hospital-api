@@ -155,14 +155,14 @@ module.exports.createreport = function(req,res){
 
 //displays the slected status
 module.exports.reports = function(req,res){
-    // jwt.verify(token, 'hospital', function(err, decoded) {
-    //     if (err) {
+    jwt.verify(token, 'hospital', function(err, decoded) {
+        if (err) {
           
-    //      if(err.name=='TokenExpiredError'){
-    //         return res.status(500).send('Token expired , login again');
-    //      }
-    //     }
-    //     if(decoded){
+         if(err.name=='TokenExpiredError'){
+            return res.status(500).send('Token expired , login again');
+         }
+        }
+        if(decoded){
             
             patient.find({_id:req.params.id}).populate('report')
             .exec(function(err,patient){
@@ -188,11 +188,11 @@ module.exports.reports = function(req,res){
                     res.status(500).send('no user exists');
                 }
             })
-    //     }
-    //     else{
-    //         return res.status(500).send('Token expired , login again'); 
-    //     }
-    //   });
+        }
+        else{
+            return res.status(500).send('Token expired , login again'); 
+        }
+      });
     
     
 }
